@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Mechanical Calculator — Mega Features (with Background Toggle)</title>
+<style>
+  :root{
+    --bg:#0c0d10;--panel:#13151b;--panel-2:#1b1e27;--ink:#e7f2ea;--muted:#a9b4ad;--accent:#7ef7c7;--accent-2:#ffd166;--danger:#ff6b6b;
+    --gear-1:#d6b25e;--gear-2:#f3d98b;--gear-3:#8c6b2e;--btn:#222633;--btn-hi:#2a3040;--shadow:0 8px 24px rgba(0,0,0,.35);
+  }
+  [data-theme="ivory"]{--bg:#f7f4ea;--panel:#ffffff;--panel-2:#f1efe8;--ink:#27302b;--muted:#5a645d;--accent:#0aa77d;--accent-2:#c18b00;--btn:#ededed;--btn-hi:#e4e4e4;}
+  *{box-sizing:border-box}html,body{height:100%}body{margin:0;font:16px/1.4 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto;color:var(--ink);background:radial-gradient(1200px 600px at 10% -10%,#1a1f2b,transparent),radial-gradient(900px 600px at 110% 10%,#0f1320,transparent),var(--bg);}
+  a{color:var(--accent)}
+  .app{max-width:1100px;margin:32px auto;padding:16px}
+  header{display:flex;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap}
+  .title{font-weight:800;font-size:clamp(20px,3vw,28px);letter-spacing:.5px}
+  .subtitle{color:var(--muted);font-size:13px}
+  .row{display:flex;gap:16px;flex-wrap:wrap}
+  .col{flex:1 1 320px}
+  .panel{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid #0003;border-radius:18px;box-shadow:var(--shadow)}
+  .pad{padding:16px}
+  .display{padding:18px 16px;border-bottom:1px solid #fff1;background:linear-gradient(180deg,#0b0e14,transparent);border-top-left-radius:18px;border-top-right-radius:18px}
+  .sub{min-height:18px;color:var(--muted);font-family:ui-monospace,Consolas,monospace;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .main{display:flex;align-items:baseline;gap:8px}
+  .main .value{font-family:ui-monospace,Consolas,monospace;font-size:34px;letter-spacing:1px;word-break:break-all}
+  .tape{max-height:320px;overflow:auto;padding:8px 12px}
+  .tape-item{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px dashed #fff2;font-family:ui-monospace,Consolas,monospace}
+  .tape-item .expr{color:var(--muted)}
+  .kgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .btn{user-select:none;border:0;cursor:pointer;padding:12px 10px;border-radius:14px;background:var(--btn);color:var(--ink);font-weight:700;box-shadow:inset 0 -2px 0 #0006, 0 2px 0 #0008;transition:.08s transform,.15s background}
+  .btn:hover{background:var(--btn-hi)}
+  .btn:active{transform:translateY(1px)}
+  .btn.op{background:#243042}
+  .btn.eq{background:var(--accent);color:#0b1512}
+  .btn.danger{background:#3a1e23}
+  .btn.small{padding:8px 10px;font-size:12px}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap}
+  .toolbar .btn{background:#1f2432}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 0 0}
+  .tab{padding:8px 10px;border-radius:12px;border:1px solid #0003;background:linear-gradient(180deg,#212634,#1b1f2b);cursor:pointer;font-weight:700}
+  .tab.active{background:linear-gradient(180deg,#2a3142,#23293a);outline:2px solid var(--accent)}
+  /* Programmer */
+  .prog{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .prog .box{padding:10px;border-radius:12px;background:#0f1320;border:1px solid #0003;font-family:ui-monospace,Consolas,monospace}
+  .stack{font-family:ui-monospace,Consolas,monospace;background:#0f1320;border:1px solid #0003;border-radius:12px;padding:8px;max-height:240px;overflow:auto}
+  .stack li{display:flex;justify-content:space-between;gap:8px;padding:6px 4px;border-bottom:1px dashed #fff2}
+  .stack .idx{color:var(--muted)}
+  /* Gears */
+  .gears{display:flex;gap:10px;align-items:center}
+  .gear{--s:30px;--a:8s;--c1:var(--gear-1);--c2:var(--gear-2);position:relative;width:var(--s);height:var(--s);filter:drop-shadow(0 4px 6px rgba(0,0,0,.3));}
+  .gear:before,.gear:after{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg, var(--c1) 0 10%, var(--c2) 10% 20%, var(--c1) 20% 30%, var(--c2) 30% 40%, var(--c1) 40% 50%, var(--c2) 50% 60%, var(--c1) 60% 70%, var(--c2) 70% 80%, var(--c1) 80% 90%, var(--c2) 90% 100%);} 
+  .gear:after{inset:25% 25%;background:radial-gradient(circle at 50% 50%,#fff8,transparent 60%)}
+  .spin{animation:spin var(--a) linear infinite}
+  .spin.rev{animation-direction:reverse}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .select, select, input[type="number"], input[type="text"]{background:#0f1320;border:1px solid #0006;border-radius:10px;padding:8px 10px;color:var(--ink);font-weight:700;outline:none}
+  .label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+  .flex{display:flex;gap:10px;align-items:center}
+  .grow{flex:1}
+  .right{margin-left:auto}
+  .footer{margin-top:16px;color:var(--muted);font-size:12px;text-align:center}
+
+  /* --- Optional: subtle glass look for panels when body has data-bg='repo' or 'black' --- */
+  .panel.glassy{background:linear-gradient(180deg, rgba(30,36,50,0.65), rgba(20,24,34,0.55)); backdrop-filter: blur(8px);}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="gears"><div class="gear spin" style="--s:34px"></div><div class="gear spin rev" style="--s:28px;--a:6s"></div></div>
+    <div>
+      <div class="title">Mechanical Calculator — Mega Features</div>
+      <div class="subtitle">Standard · RPN · Programmer · Unit Converter · Tape · Memory · Themes</div>
+    </div>
+    <div class="right flex" style="flex-wrap:wrap">
+      <span class="label">Theme</span>
+      <select id="theme" class="select">
+        <option value="dark">Obsidian</option>
+        <option value="ivory">Ivory</option>
+      </select>
+
+      <span class="label">Background</span>
+      <select id="bgMode" class="select">
+        <option value="black">Black</option>
+        <option value="repo">Repo Image</option>
+      </select>
+    </div>
+  </header>
+
+  <div class="row">
+    <!-- Left: Calculator core -->
+    <div class="col panel glassy">
+      <div class="display">
+        <div class="sub" id="sub">&nbsp;</div>
+        <div class="main"><div class="value" id="value">0</div></div>
+      </div>
+      <div class="pad">
+        <div class="toolbar" style="margin-bottom:10px">
+          <button class="btn small" id="mc">MC</button>
+          <button class="btn small" id="mr">MR</button>
+          <button class="btn small" id="mplus">M+</button>
+          <button class="btn small" id="mminus">M-</button>
+          <button class="btn small" id="inv">INV</button>
+          <button class="btn small" id="deg">DEG</button>
+          <button class="btn small" id="rad">RAD</button>
+          <button class="btn small" id="copy">Copy</button>
+        </div>
+
+        <div class="tabs" id="tabs">
+          <div class="tab active" data-tab="std">Standard</div>
+          <div class="tab" data-tab="rpn">RPN</div>
+          <div class="tab" data-tab="prog">Programmer</div>
+          <div class="tab" data-tab="conv">Converter</div>
+        </div>
+
+        <!-- Standard keypad -->
+        <div class="kgrid" id="pad-std" style="margin-top:10px">
+          <button class="btn danger" data-k="AC">AC</button>
+          <button class="btn danger" data-k="CE">CE</button>
+          <button class="btn op" data-k="(">(</button>
+          <button class="btn op" data-k=")">)</button>
+
+          <button class="btn" data-k="7">7</button>
+          <button class="btn" data-k="8">8</button>
+          <button class="btn" data-k="9">9</button>
+          <button class="btn op" data-k="/">÷</button>
+
+          <button class="btn" data-k="4">4</button>
+          <button class="btn" data-k="5">5</button>
+          <button class="btn" data-k="6">6</button>
+          <button class="btn op" data-k="*">×</button>
+
+          <button class="btn" data-k="1">1</button>
+          <button class="btn" data-k="2">2</button>
+          <button class="btn" data-k="3">3</button>
+          <button class="btn op" data-k="-">−</button>
+
+          <button class="btn" data-k="0">0</button>
+          <button class="btn" data-k=".">.</button>
+          <button class="btn op" data-k="+">+</button>
+          <button class="btn eq" data-k="=">=</button>
+
+          <button class="btn op" data-fn="pow2">x²</button>
+          <button class="btn op" data-fn="sqrt">√x</button>
+          <button class="btn op" data-fn="pow">xʸ</button>
+          <button class="btn op" data-fn="frac">1/x</button>
+
+          <button class="btn op" data-fn="sin">sin</button>
+          <button class="btn op" data-fn="cos">cos</button>
+          <button class="btn op" data-fn="tan">tan</button>
+          <button class="btn op" data-fn="sign">±</button>
+        </div>
+
+        <!-- RPN keypad -->
+        <div class="pad" id="pad-rpn" style="display:none;padding:0;margin-top:10px">
+          <div class="flex" style="margin-bottom:10px">
+            <input id="rpn-input" class="grow" placeholder="Enter number then press ENTER" />
+            <button class="btn" id="rpn-enter">ENTER</button>
+            <button class="btn" id="rpn-swap">SWAP</button>
+            <button class="btn danger" id="rpn-pop">POP</button>
+          </div>
+          <div class="kgrid" style="grid-template-columns:repeat(5,1fr)">
+            <button class="btn op" data-rpn="+">+</button>
+            <button class="btn op" data-rpn="-">−</button>
+            <button class="btn op" data-rpn="*">×</button>
+            <button class="btn op" data-rpn="/">÷</button>
+            <button class="btn op" data-rpn="pow">xʸ</button>
+            <button class="btn op" data-rpn="sqrt">√x</button>
+            <button class="btn op" data-rpn="sin">sin</button>
+            <button class="btn op" data-rpn="cos">cos</button>
+            <button class="btn op" data-rpn="tan">tan</button>
+          </div>
+          <ul id="rpn-stack" class="stack" style="margin-top:10px"></ul>
+        </div>
+
+        <!-- Programmer keypad -->
+        <div id="pad-prog" style="display:none;margin-top:10px">
+          <div class="prog">
+            <div class="box">
+              <div class="label">Base</div>
+              <div class="flex">
+                <select id="base" class="select">
+                  <option value="2">BIN</option>
+                  <option value="8">OCT</option>
+                  <option value="10" selected>DEC</option>
+                  <option value="16">HEX</option>
+                </select>
+                <label class="flex" style="gap:6px"><input id="word32" type="checkbox" checked /> <span class="label">32-bit</span></label>
+              </div>
+            </div>
+            <div class="box">
+              <div class="label">Value</div>
+              <input id="prog-in" class="grow" placeholder="Enter number" />
+            </div>
+            <div class="box"><div class="label">BIN</div><div id="out-bin"></div></div>
+            <div class="box"><div class="label">OCT</div><div id="out-oct"></div></div>
+            <div class="box"><div class="label">DEC</div><div id="out-dec"></div></div>
+            <div class="box"><div class="label">HEX</div><div id="out-hex"></div></div>
+          </div>
+          <div class="kgrid" style="grid-template-columns:repeat(6,1fr);margin-top:10px">
+            <button class="btn op" data-bit="and">AND</button>
+            <button class="btn op" data-bit="or">OR</button>
+            <button class="btn op" data-bit="xor">XOR</button>
+            <button class="btn op" data-bit="not">NOT</button>
+            <button class="btn op" data-bit="shl">SHL</button>
+            <button class="btn op" data-bit="shr">SHR</button>
+          </div>
+        </div>
+
+        <!-- Converter -->
+        <div id="pad-conv" style="display:none;margin-top:10px">
+          <div class="prog">
+            <div class="box">
+              <div class="label">From</div>
+              <div class="flex">
+                <select id="from-kind" class="select">
+                  <option value="len">Length</option>
+                  <option value="temp">Temperature</option>
+                  <option value="mass">Mass</option>
+                </select>
+                <input id="from-val" class="grow" type="number" value="1" />
+              </div>
+            </div>
+            <div class="box">
+              <div class="label">Unit</div>
+              <select id="from-unit" class="select"></select>
+            </div>
+            <div class="box">
+              <div class="label">To</div>
+              <input id="to-val" class="grow" type="text" readonly />
+            </div>
+            <div class="box">
+              <div class="label">Unit</div>
+              <select id="to-unit" class="select"></select>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Right: Tape / Stack / Actions -->
+    <div class="col panel glassy">
+      <div class="pad">
+        <div class="flex" style="margin-bottom:8px">
+          <div class="title" style="font-size:18px">Register Tape</div>
+          <button class="btn small right" id="tape-clear">Clear</button>
+          <button class="btn small" id="tape-save">Download</button>
+        </div>
+        <div id="tape" class="tape"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">Tip: Keyboard friendly — digits, operators, Enter (=), Backspace, parentheses. RPN: type number then press Enter.</div>
+</div>
+
+<script>
+(() => {
+  const el = (id) => document.getElementById(id);
+  const value = el('value');
+  const sub = el('sub');
+  const tapeEl = el('tape');
+  const tabsEl = el('tabs');
+  const themeSel = el('theme');
+  const bgModeSel = el('bgMode');
+
+  // Persistent state
+  const state = JSON.parse(localStorage.getItem('mechCalc.state')||'{}');
+  let memory = state.memory || 0;
+  let inv = !!state.inv;
+  let angle = state.angle || 'DEG';
+  let current = '0';
+  let expr = '';
+
+  // ----- Utility
+  const clamp32 = (n) => (n>>>0) | 0; // 32-bit
+  const fmt = (n) => {
+    const s = (''+n);
+    if(!/^-?\d+(?:\.\d+)?$/.test(s)) return s;
+    const [a,b] = s.split('.');
+    return a.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + (b?'.'+b:'');
+  };
+  const write = (main, small) => { value.textContent = main; sub.textContent = small || '\u00A0'; };
+  const pushTape = (expr, res) => {
+    const row = document.createElement('div');
+    row.className='tape-item';
+    const l = document.createElement('div'); l.className='expr'; l.textContent=expr;
+    const r = document.createElement('div'); r.textContent=res;
+    row.append(l,r); tapeEl.prepend(row);
+  };
+  const saveTape = () => {
+    let txt = ''; document.querySelectorAll('.tape-item').forEach(it=>{txt += it.querySelector('.expr').textContent+ ' = ' + it.lastChild.textContent + "\n"});
+    const blob = new Blob([txt], {type:'text/plain'}); const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download='tape.txt'; a.click(); URL.revokeObjectURL(url);
+  };
+
+  // ----- Tabs
+  const tabs = ['std','rpn','prog','conv'];
+  tabsEl.addEventListener('click', (e)=>{
+    const t = e.target.closest('.tab'); if(!t) return; document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active');
+    tabs.forEach(id=>{ const on = id===t.dataset.tab; el('pad-'+id)?.setAttribute('style', 'display:'+(on?'':'none')) });
+  });
+
+  // ----- Theme
+  if(state.theme) themeSel.value = state.theme; document.body.dataset.theme = themeSel.value;
+  themeSel.addEventListener('change', ()=>{ document.body.dataset.theme = themeSel.value; state.theme = themeSel.value; persist(); });
+
+  // ----- Background mode
+  const REPO_BG = 'https://raw.githubusercontent.com/Bismay-exe/Mechanical-Calculator/main/backgrounds/bg.png';
+  const applyBg = (mode)=>{
+    document.body.dataset.bg = mode;
+    // reset custom properties applied earlier
+    document.body.style.background = '';
+    document.body.style.backgroundImage = '';
+    document.body.style.backgroundRepeat = '';
+    document.body.style.backgroundPosition = '';
+    document.body.style.backgroundAttachment = '';
+    document.body.style.backgroundSize = '';
+
+    if(mode==='black') {
+      document.body.style.background = 'black';
+    } else {
+      document.body.style.backgroundImage = `url('${REPO_BG}')`;
+      document.body.style.backgroundRepeat = 'no-repeat';
+      document.body.style.backgroundPosition = 'center center';
+      document.body.style.backgroundAttachment = 'fixed';
+      document.body.style.backgroundSize = 'cover';
+    }
+  };
+  const bgMode = state.bgMode || 'black';
+  bgModeSel.value = bgMode;
+  applyBg(bgMode);
+  bgModeSel.addEventListener('change', ()=>{ state.bgMode = bgModeSel.value; applyBg(state.bgMode); setPanelGlass(); persist(); });
+
+  // Optional: add glassy class when using repo background for nicer look
+  const setPanelGlass = ()=>{
+    const glas = document.querySelectorAll('.panel');
+    if((state.bgMode||'black') === 'repo') { glas.forEach(p=>p.classList.add('glassy')); }
+    else { glas.forEach(p=>p.classList.remove('glassy')); }
+  };
+  setPanelGlass();
+
+  // ----- Memory & toolbar
+  const memShow = () => sub.textContent = `MEM: ${fmt(memory)}`;
+  el('mc').onclick = ()=>{ memory=0; memShow(); persist(); };
+  el('mr').onclick = ()=>{ write(fmt(memory), 'MR'); };
+  el('mplus').onclick = ()=>{ memory += Number(value.textContent.replace(/,/g,''))||0; memShow(); persist(); };
+  el('mminus').onclick = ()=>{ memory -= Number(value.textContent.replace(/,/g,''))||0; memShow(); persist(); };
+  el('copy').onclick = async()=>{ await navigator.clipboard.writeText(value.textContent); sub.textContent='Copied!'; };
+  el('inv').onclick = ()=>{ inv=!inv; sub.textContent = inv? 'Inverse ON':'Inverse OFF'; persist(); };
+  el('deg').onclick = ()=>{ angle='DEG'; sub.textContent='DEG'; persist(); };
+  el('rad').onclick = ()=>{ angle='RAD'; sub.textContent='RAD'; persist(); };
+
+  // ----- Standard calculator
+  const padStd = el('pad-std');
+  const binaryOps = new Set(['+','-','*','/','%','^']);
+
+  // Basic safe evaluator (shunting-yard)
+  function toRPN(infix){
+    const out=[], ops=[];
+    const tokens = (infix.replace(/\s+/g,'').match(/\d*\.\d+|\d+|[()+\-*/%^]/g)||[]);
+    const prec = {'+':1,'-':1,'*':2,'/':2,'%':2,'^':3};
+    const right = {'^':true};
+    for(const t of tokens){
+      if(/\d/.test(t)) out.push(t);
+      else if(t in prec){
+        while(ops.length){ const p=ops[ops.length-1]; if((p in prec)&&((!right[t]&&prec[t]<=prec[p])||(right[t]&&prec[t]<prec[p]))) out.push(ops.pop()); else break; }
+        ops.push(t);
+      } else if(t==='(') ops.push(t);
+      else if(t===')'){ while(ops.length&&ops[ops.length-1]!== '(') out.push(ops.pop()); ops.pop(); }
+    }
+    while(ops.length) out.push(ops.pop());
+    return out;
+  }
+  function evalStd(expr){
+    const rpn = toRPN(expr);
+    const st=[];
+    for(const t of rpn){
+      if(/^-?\d*\.?\d+$/.test(t)) st.push(parseFloat(t));
+      else{
+        const b=st.pop(), a=st.pop(); if(a===undefined||b===undefined) return NaN;
+        switch(t){
+          case '+': st.push(a+b); break; case '-': st.push(a-b); break; case '*': st.push(a*b); break; case '/': st.push(a/b); break; case '%': st.push(a%b); break; case '^': st.push(Math.pow(a,b)); break;
+        }
+      }
+    }
+    return st.pop();
+  }
+
+  const writeExpr = () => { write(expr?fmtExpr(expr):'0', current?fmtExpr(current):''); };
+  const fmtExpr = (s) => s;
+
+  padStd.addEventListener('click', (e)=>{
+    const b = e.target.closest('button'); if(!b) return;
+    const k = b.dataset.k; const fn = b.dataset.fn;
+    if(k){
+      if(k==='='){ if(!expr) return; const res = evalStd(expr); write(fmt(res), expr+' ='); pushTape(expr, fmt(res)); current = String(res); expr=''; return; }
+      if(k==='AC'){ expr=''; current='0'; write('0','Ready'); return; }
+      if(k==='CE'){ expr=expr.slice(0,-1); writeExpr(); return; }
+      expr += k; writeExpr(); return;
+    }
+    if(fn){
+      const v = Number(value.textContent.replace(/,/g,''));
+      const ang = angle==='DEG'? (x)=>x*Math.PI/180 : (x)=>x;
+      const invTrig = inv;
+      let res = v;
+      switch(fn){
+        case 'pow2': res = v*v; break;
+        case 'sqrt': res = Math.sqrt(v); break;
+        case 'pow': expr = (expr || String(v)) + '^'; writeExpr(); return;
+        case 'frac': res = 1/v; break;
+        case 'sign': res = -v; break;
+        case 'sin': res = invTrig? Math.asin(v) : Math.sin(ang(v)); if(invTrig&&angle==='DEG') res = res*180/Math.PI; break;
+        case 'cos': res = invTrig? Math.acos(v) : Math.cos(ang(v)); if(invTrig&&angle==='DEG') res = res*180/Math.PI; break;
+        case 'tan': res = invTrig? Math.atan(v) : Math.tan(ang(v)); if(invTrig&&angle==='DEG') res = res*180/Math.PI; break;
+      }
+      write(fmt(res), fn.toUpperCase()); pushTape(fn+'('+v+')', fmt(res)); current = String(res);
+    }
+  });
+
+  document.addEventListener('keydown', (e)=>{
+    if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+    if(e.key==='Enter'){ const res = evalStd(expr); if(expr){ write(fmt(res), expr+' ='); pushTape(expr, fmt(res)); current=String(res); expr=''; } return; }
+    if(e.key==='Backspace'){ expr = expr.slice(0,-1); writeExpr(); return; }
+    if(/^[-+*/().^%\d]$/.test(e.key)){ expr += e.key; writeExpr(); }
+    if(e.key==='.'){ expr+='.'; writeExpr(); }
+  });
+
+  // ----- RPN mode
+  const rpnStackEl = el('rpn-stack');
+  const rpnIn = el('rpn-input');
+  const rpn = [];
+  const drawStack = ()=>{
+    rpnStackEl.innerHTML='';
+    [...rpn].reverse().forEach((v,i)=>{
+      const li = document.createElement('li');
+      const idx = document.createElement('span'); idx.className='idx'; idx.textContent = 'R'+(rpn.length-i);
+      const val = document.createElement('span'); val.textContent = fmt(v);
+      li.append(idx,val); rpnStackEl.append(li);
+    });
+    write(rpn.length?fmt(rpn[rpn.length-1]):'0', 'RPN Top');
+  };
+  el('rpn-enter').onclick = ()=>{ const x = parseFloat(rpnIn.value); if(!isNaN(x)) rpn.push(x); rpnIn.value=''; drawStack(); };
+  el('rpn-pop').onclick = ()=>{ rpn.pop(); drawStack(); };
+  el('rpn-swap').onclick = ()=>{ if(rpn.length>=2){ const a=rpn.pop(), b=rpn.pop(); rpn.push(a,b); } drawStack(); };
+  document.querySelectorAll('[data-rpn]').forEach(b=> b.addEventListener('click',()=>{
+    const op = b.dataset.rpn;
+    const take = ()=> rpn.pop();
+    let a,bv,res;
+    switch(op){
+      case '+': bv=take(); a=take(); res=a+bv; break;
+      case '-': bv=take(); a=take(); res=a-bv; break;
+      case '*': bv=take(); a=take(); res=a*bv; break;
+      case '/': bv=take(); a=take(); res=a/bv; break;
+      case 'pow': bv=take(); a=take(); res=Math.pow(a,bv); break;
+      case 'sqrt': a=take(); res=Math.sqrt(a); break;
+      case 'sin': a=take(); res=Math.sin(angle==='DEG'? a*Math.PI/180:a); break;
+      case 'cos': a=take(); res=Math.cos(angle==='DEG'? a*Math.PI/180:a); break;
+      case 'tan': a=take(); res=Math.tan(angle==='DEG'? a*Math.PI/180:a); break;
+    }
+    if(res!==undefined){ rpn.push(res); pushTape(`RPN ${op}`, fmt(res)); }
+    drawStack();
+  }));
+
+  // ----- Programmer mode
+  const baseSel = el('base');
+  const progIn = el('prog-in');
+  const outBin = el('out-bin');
+  const outOct = el('out-oct');
+  const outDec = el('out-dec');
+  const outHex = el('out-hex');
+  const word32 = el('word32');
+
+  function parseProg(){
+    let b = parseInt(baseSel.value,10);
+    let s = (progIn.value||'0').trim();
+    let n = parseInt(s, b);
+    if(word32.checked){ n = clamp32(n); if(n<0) n = 0xFFFFFFFF + n + 1; }
+    if(isNaN(n)) n = 0;
+    outBin.textContent = (n>>>0).toString(2).padStart(32,'0').replace(/(.{4})/g,'$1 ').trim();
+    outOct.textContent = (n>>>0).toString(8);
+    outDec.textContent = String(n>>>0);
+    outHex.textContent = (n>>>0).toString(16).toUpperCase();
+  }
+  [baseSel, progIn, word32].forEach(x=> x.addEventListener('input', parseProg));
+  parseProg();
+
+  document.querySelectorAll('[data-bit]').forEach(b=> b.addEventListener('click',()=>{
+    const op = b.dataset.bit; let a = parseInt(outDec.textContent,10)>>>0; let res=a;
+    if(['and','or','xor','shl','shr'].includes(op)){
+      const other = prompt(op.toUpperCase()+': with what value? (DEC)');
+      const v = (parseInt(other,10)>>>0)||0;
+      if(op==='and') res = (a & v)>>>0; if(op==='or') res=(a|v)>>>0; if(op==='xor') res=(a^v)>>>0; if(op==='shl') res=(a<< (v&31))>>>0; if(op==='shr') res=(a>>> (v&31))>>>0;
+    } else if(op==='not'){ res = (~a)>>>0; }
+    progIn.value = String(res); baseSel.value='10'; parseProg(); pushTape(`BIT ${op.toUpperCase()}`, res);
+  }));
+
+  // ----- Converter
+  const units = {
+    len: { m:1, km:1000, cm:0.01, mm:0.001, mi:1609.344, yd:0.9144, ft:0.3048, in:0.0254 },
+    mass: { kg:1, g:0.001, lb:0.45359237, oz:0.028349523125 },
+    temp: { C:'C', F:'F', K:'K' }
+  };
+  const fromKind = el('from-kind'); const fromUnit = el('from-unit'); const toUnit = el('to-unit'); const fromVal = el('from-val'); const toVal = el('to-val');
+  function fillUnits(){
+    const k = fromKind.value; const list = Object.keys(units[k]);
+    fromUnit.innerHTML = list.map(u=>`<option>${u}</option>`).join('');
+    toUnit.innerHTML = list.map(u=>`<option ${u==='km'? 'selected':''}>${u}</option>`).join('');
+    convert();
+  }
+  function convert(){
+    const k = fromKind.value; let x = parseFloat(fromVal.value)||0; const a = fromUnit.value; const b = toUnit.value;
+    let y=0;
+    if(k==='temp'){
+      const toC = (v,u)=> u==='C'? v : u==='F'? (v-32)*5/9 : v-273.15;
+      const fromC = (v,u)=> u==='C'? v : u==='F'? v*9/5+32 : v+273.15;
+      y = fromC(toC(x,a), b);
+    } else {
+      const toM = x*units[k][a]; y = toM/units[k][b];
+    }
+    toVal.value = String(y);
+    pushTape(`CONV ${x} ${a}→${b}`, y);
+  }
+  [fromKind, fromUnit, toUnit, fromVal].forEach(n=> n.addEventListener('input', convert));
+  fillUnits();
+
+  // ----- Tape actions
+  el('tape-clear').onclick = ()=>{ tapeEl.innerHTML=''; };
+  el('tape-save').onclick = saveTape;
+
+  // ----- Persistence
+  function persist(){
+    localStorage.setItem('mechCalc.state', JSON.stringify({ memory, inv, angle, theme:themeSel.value, bgMode: bgModeSel.value }));
+  }
+
+  // Initial paint
+  write('0','Ready');
+})();
+</script>
+</body>
+</html>
