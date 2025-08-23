@@ -16,6 +16,38 @@
 
 ---
 
+## 📸 Preview
+
+<p align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <img src="assets/screenshots/std.png" alt="Standard Calculator" width="400px" style="border-radius:15px;box-shadow:0 4px 12px rgba(0,0,0,0.25);" /><br>
+        <b>Standard Calculator</b>
+      </td>
+      <td align="center">
+        <img src="assets/screenshots/rpn.png" alt="RPN Mode" width="400px" style="border-radius:15px;box-shadow:0 4px 12px rgba(0,0,0,0.25);" /><br>
+        <b>RPN Mode</b>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <img src="assets/screenshots/prog.png" alt="Programmer Mode" width="400px" style="border-radius:15px;box-shadow:0 4px 12px rgba(0,0,0,0.25);" /><br>
+        <b>Programmer Mode</b>
+      </td>
+      <td align="center">
+        <img src="assets/screenshots/conv.png" alt="Unit Converter" width="400px" style="border-radius:15px;box-shadow:0 4px 12px rgba(0,0,0,0.25);" /><br>
+        <b>Unit Converter</b>
+      </td>
+    </tr>
+  </table>
+</p>
+
+A modern **glassmorphism-themed calculator** with multiple modes and a beautiful UI.  
+Designed to be **powerful, elegant, and keyboard-friendly**, this project brings **Standard, RPN, Programmer, and Converter** calculators into one.
+
+---
+
 ## ✅ Features at a Glance
 
 <div align="center">
@@ -78,39 +110,6 @@ Responsive layout
 </div>
 
  
-
----
-
-## 📸 Preview
-
-<p align="center">
-  <table>
-    <tr>
-      <td align="center">
-        <img src="assets/screenshots/std.png" alt="Standard Calculator" width="400px" style="border-radius:15px;box-shadow:0 4px 12px rgba(0,0,0,0.25);" /><br>
-        <b>Standard Calculator</b>
-      </td>
-      <td align="center">
-        <img src="assets/screenshots/rpn.png" alt="RPN Mode" width="400px" style="border-radius:15px;box-shadow:0 4px 12px rgba(0,0,0,0.25);" /><br>
-        <b>RPN Mode</b>
-      </td>
-    </tr>
-    <tr>
-      <td align="center">
-        <img src="assets/screenshots/prog.png" alt="Programmer Mode" width="400px" style="border-radius:15px;box-shadow:0 4px 12px rgba(0,0,0,0.25);" /><br>
-        <b>Programmer Mode</b>
-      </td>
-      <td align="center">
-        <img src="assets/screenshots/conv.png" alt="Unit Converter" width="400px" style="border-radius:15px;box-shadow:0 4px 12px rgba(0,0,0,0.25);" /><br>
-        <b>Unit Converter</b>
-      </td>
-    </tr>
-  </table>
-</p>
-
-A modern **glassmorphism-themed calculator** with multiple modes and a beautiful UI.  
-Designed to be **powerful, elegant, and keyboard-friendly**, this project brings **Standard, RPN, Programmer, and Converter** calculators into one.
-
 ---
 
 ## ⚙️ About Mechanical Calculator
