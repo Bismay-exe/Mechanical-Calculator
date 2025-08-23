@@ -6,12 +6,16 @@
 </p>
 
 <p align="center">
+  <a href="https://bismay-exe.github.io/Mechanical-Calculator/">
+    <img src="https://img.shields.io/badge/🌐%20Live%20Website-Mechanical%20Calculator-36BCF7?style=for-the-badge&logo=code&logoColor=white" />
+  </a>
   <img src="https://img.shields.io/badge/HTML-5-orange?style=for-the-badge&logo=html5&logoColor=white" />
   <img src="https://img.shields.io/badge/CSS-3-blue?style=for-the-badge&logo=css3&logoColor=white" />
   <img src="https://img.shields.io/badge/JavaScript-ES6-yellow?style=for-the-badge&logo=javascript&logoColor=black" />
   <img src="https://img.shields.io/badge/Open%20Source-❤️-green?style=for-the-badge&logo=github&logoColor=white" />
   <img src="https://img.shields.io/badge/License-MIT-blueviolet?style=for-the-badge" />
 </p>
+
 
 
 ---
